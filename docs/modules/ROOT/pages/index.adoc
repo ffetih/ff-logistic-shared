@@ -12,4 +12,21 @@ Code written once, that does not care which implementation is active (xref:ff-lo
 | `analytics-loader` | Deliveries from Kafka into the analytics database, tenant-locked and rolled up per month | S6
 |===
 
+[mermaid]
+....
+flowchart BT
+  STD[ff-domain-standards] --> WH[ff-domain-warehousing] & TR[ff-domain-transportation] & RO[ff-domain-routing]
+  WH & TR & RO --> MOD["modulith: logistics-app<br/>all four"]
+  WH --> S1[warehousing service]
+  TR --> S2[transportation service]
+  RO --> S3[routing service]
+....
+
+Each core is a plain library under `com.siose.ff.logistics.<area>`: its `package-info.java` names the module and what it may use, and its `<Area>Area` configuration declares the area's migrations (`db/migration/<area>`, history table `<area>_flyway_history`). An application in `com.siose.ff.logistics` picks the cores up by component scanning, whether it holds one (a service) or all (the modulith).
+
+[source,bash]
+----
+./build.sh          # after ../base/build.sh: installs the cores and builds identity
+----
+
 Each deployable part keeps its deploy values next to its code, in `deploy/apps/<name>`; the Application that deploys it lives in ff-logistic-runtime (xref:ff-logistic::decisions.adoc#d8[decision 8]).
