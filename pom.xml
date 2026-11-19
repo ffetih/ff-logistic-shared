@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Aggregator only: builds everything in this repository in one reactor. Each module's parent is
+    ff-base-parent from ff-logistic-base, installed in the local Maven repository first.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.siose.ff</groupId>
+    <artifactId>ff-logistic-shared</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>FF Logistic - Shared</name>
+
+    <modules>
+        <module>domain/ff-domain-standards</module>
+        <module>domain/ff-domain-warehousing</module>
+        <module>domain/ff-domain-transportation</module>
+        <module>domain/ff-domain-routing</module>
+        <module>identity</module>
+    </modules>
+</project>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.siose.ff</groupId>
+        <artifactId>ff-base-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath/>
+    </parent>
+
+    <!--
+        A domain core (decision 2): the Routing area, written once, run by the modulith and by its
+        service. It depends on ff-domain-standards and on nothing else of the business: what it
+        needs from another area is a port, fulfilled by whichever implementation runs it.
+    -->
+    <groupId>com.siose.ff</groupId>
+    <artifactId>ff-domain-routing</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <name>FF Logistic - Domain - Routing</name>
+    <description>Delivery territories and route plans with time windows, optimized over a road matrix, with proof of delivery.</description>
+
+    <dependencies>
+        <!-- package-info.java: the module's boundaries, which Spring Modulith checks in the modulith -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-domain-standards</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+    </dependencies>
+</project>
