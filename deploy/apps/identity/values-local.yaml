@@ -1,0 +1,33 @@
+# Identity service on the local k3d cluster. Read after values.yaml, so it wins.
+service:
+  type: NodePort
+  nodePort: 30085 # host port 8085
+
+# Every variable in one list: Helm replaces lists, it does not merge them.
+# Keycloak is the keycloak Application in the same namespace. The service calls it on its
+# in-cluster address; the tokens name its public address as issuer.
+env:
+  - name: IDENTITY_KEYCLOAK_BASE_URL
+    value: http://keycloak:8080
+  - name: IDENTITY_KEYCLOAK_ISSUER
+    value: http://localhost:8180/realms/ff-logistics
+  - name: IDENTITY_KEYCLOAK_ADMIN_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-credentials
+        key: admin-username
+  - name: IDENTITY_KEYCLOAK_ADMIN_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-credentials
+        key: admin-password
+  - name: IDENTITY_KEYCLOAK_SERVICE_CLIENT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-credentials
+        key: identity-service-client-secret
+  - name: IDENTITY_BROKER_KEY
+    valueFrom:
+      secretKeyRef:
+        name: keycloak-credentials
+        key: identity-broker-key

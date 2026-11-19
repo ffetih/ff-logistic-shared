@@ -1,0 +1,15 @@
+= Shared
+:description: What FF Logistic writes once, whichever implementation runs.
+
+Code written once, that does not care which implementation is active (xref:ff-logistic::decisions.adoc#d1[decision 1]).
+
+[cols="2,4,2",options="header"]
+|===
+| Part | What | Since
+
+| `identity` | The facade over Keycloak, and the only process that calls it: sign-in, service tokens, users, integration clients, and the published keys (JWKS) every application verifies tokens against | S0
+| `domain` | The business areas as jars: standards, warehousing, transportation, routing (xref:ff-logistic::decisions.adoc#d2[decision 2]) | S1
+| `analytics-loader` | Deliveries from Kafka into the analytics database, tenant-locked and rolled up per month | S6
+|===
+
+Each deployable part keeps its deploy values next to its code, in `deploy/apps/<name>`; the Application that deploys it lives in ff-logistic-runtime (xref:ff-logistic::decisions.adoc#d8[decision 8]).

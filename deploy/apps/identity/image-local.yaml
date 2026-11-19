@@ -1,0 +1,5 @@
+# The tag of the image imported into the k3d cluster with
+# `k3d image import ghcr.io/ffetih/ff-logistic-shared/identity:local -c ff-logistic`.
+# CI does not publish this image yet, so nothing rewrites this file.
+image:
+  tag: local

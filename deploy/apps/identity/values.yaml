@@ -1,0 +1,9 @@
+# Identity service, every environment. Overrides the chart's defaults
+# (ff-logistic-runtime: deploy/charts/ff-service/values.yaml).
+image:
+  repository: ghcr.io/ffetih/ff-logistic-shared/identity
+
+containerPort: 8085
+
+service:
+  port: 8085
