@@ -1,0 +1,16 @@
+.cursor/
+
+target/
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
