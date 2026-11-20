@@ -40,17 +40,46 @@ public class TransportLeg extends TenantAwareEntity {
     @Column(nullable = false, length = 60)
     private String carrierReference;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private DistanceSource distanceSource;
+
+    /** Where the leg starts and ends, in degrees; null for a leg planned by its distance only. */
+    private Double originLatitude;
+
+    private Double originLongitude;
+
+    private Double destinationLatitude;
+
+    private Double destinationLongitude;
+
     protected TransportLeg() {
     }
 
-    TransportLeg(int sequenceNo, TransportMode mode, String origin, String destination, double distanceKm,
-            String carrierReference) {
+    TransportLeg(int sequenceNo, Shipment.PlannedLeg leg) {
         this.sequenceNo = sequenceNo;
-        this.mode = mode;
-        this.origin = origin;
-        this.destination = destination;
-        this.distanceKm = distanceKm;
-        this.carrierReference = carrierReference;
+        this.mode = leg.mode();
+        this.origin = leg.origin().trim();
+        this.destination = leg.destination().trim();
+        this.distanceKm = leg.distanceKm();
+        this.carrierReference = leg.carrierReference().trim();
+        this.distanceSource = leg.distanceSource();
+        if (leg.ends() != null) {
+            this.originLatitude = leg.ends().originLatitude();
+            this.originLongitude = leg.ends().originLongitude();
+            this.destinationLatitude = leg.ends().destinationLatitude();
+            this.destinationLongitude = leg.ends().destinationLongitude();
+        }
+    }
+
+    /** The coordinates of the two ends, or null. */
+    public Shipment.LegEnds getEnds() {
+        return originLatitude == null ? null
+                : new Shipment.LegEnds(originLatitude, originLongitude, destinationLatitude, destinationLongitude);
+    }
+
+    public DistanceSource getDistanceSource() {
+        return distanceSource;
     }
 
     public UUID getId() {

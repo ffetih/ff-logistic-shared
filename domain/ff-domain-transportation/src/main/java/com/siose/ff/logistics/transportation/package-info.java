@@ -7,7 +7,9 @@
  *
  * <p>Its API is this package: the events {@link com.siose.ff.logistics.transportation.ShipmentProgressed}
  * and {@link com.siose.ff.logistics.transportation.ShipmentDelivered}, which other areas react to
- * through the implementation's wiring (an in-process listener, or Kafka). {@code api} holds the REST
+ * through the implementation's wiring (an in-process listener, or Kafka), and the port
+ * {@link com.siose.ff.logistics.transportation.DistanceLookup}, a question it asks routing (flow 1),
+ * which the implementation answers (a method call, or HTTP). {@code api} holds the REST
  * controller (under {@code /api/v1/tms}), {@code domain} the entities and repositories,
  * {@code service} the use cases; all three are internal. The tables keep the short name,
  * {@code tms_*}.

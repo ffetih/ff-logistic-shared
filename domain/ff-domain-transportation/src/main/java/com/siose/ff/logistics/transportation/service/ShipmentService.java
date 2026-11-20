@@ -2,9 +2,12 @@ package com.siose.ff.logistics.transportation.service;
 
 import com.siose.ff.base.persistence.DatabaseSequences;
 import com.siose.ff.base.web.ResourceNotFoundException;
+import com.siose.ff.logistics.standards.GeoDistance;
 import com.siose.ff.logistics.standards.TransportMode;
+import com.siose.ff.logistics.transportation.DistanceLookup;
 import com.siose.ff.logistics.transportation.ShipmentDelivered;
 import com.siose.ff.logistics.transportation.ShipmentProgressed;
+import com.siose.ff.logistics.transportation.domain.DistanceSource;
 import com.siose.ff.logistics.transportation.domain.Incoterm;
 import com.siose.ff.logistics.transportation.domain.Shipment;
 import com.siose.ff.logistics.transportation.domain.ShipmentRepository;
@@ -12,6 +15,8 @@ import com.siose.ff.logistics.transportation.domain.ShipmentStatus;
 import com.siose.ff.logistics.transportation.domain.TmsConflictException;
 import com.siose.ff.logistics.transportation.domain.TransportLeg;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,6 +26,10 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -32,6 +41,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 public class ShipmentService {
 
+    private static final Logger log = LoggerFactory.getLogger(ShipmentService.class);
+
     /** Created in transportation/V2__transportation_tables.sql. */
     private static final String SHIPMENT_SEQUENCE = "tms_shipment_seq";
 
@@ -39,13 +50,20 @@ public class ShipmentService {
     private final DatabaseSequences sequences;
     private final TransactionTemplate transactions;
     private final ApplicationEventPublisher events;
+    private final ObjectProvider<DistanceLookup> distances;
 
+    /**
+     * @param distances flow 1: the implementation's way to routing. An application without one (the
+     *                  area's own tests) plans road legs by the straight-line estimate.
+     */
     ShipmentService(ShipmentRepository shipments, DatabaseSequences sequences,
-            PlatformTransactionManager transactionManager, ApplicationEventPublisher events) {
+            PlatformTransactionManager transactionManager, ApplicationEventPublisher events,
+            ObjectProvider<DistanceLookup> distances) {
         this.shipments = shipments;
         this.sequences = sequences;
         this.transactions = new TransactionTemplate(transactionManager);
         this.events = events;
+        this.distances = distances;
     }
 
     public record NewShipment(
@@ -62,12 +80,30 @@ public class ShipmentService {
             @NotEmpty @Size(max = 10) List<@Valid @NotNull NewLeg> legs) {
     }
 
+    /**
+     * A leg with its distance, or (a road leg only) with the coordinates of its two ends, from which
+     * routing works the distance out (flow 1).
+     */
     public record NewLeg(
             @NotNull TransportMode mode,
             @NotBlank @Size(max = 120) String origin,
             @NotBlank @Size(max = 120) String destination,
-            @NotNull @Positive Double distanceKm,
-            @NotBlank @Size(max = 60) String carrierReference) {
+            @Positive Double distanceKm,
+            @NotBlank @Size(max = 60) String carrierReference,
+            @DecimalMin("-90") @DecimalMax("90") Double originLatitude,
+            @DecimalMin("-180") @DecimalMax("180") Double originLongitude,
+            @DecimalMin("-90") @DecimalMax("90") Double destinationLatitude,
+            @DecimalMin("-180") @DecimalMax("180") Double destinationLongitude) {
+
+        boolean hasEnds() {
+            return originLatitude != null && originLongitude != null && destinationLatitude != null
+                    && destinationLongitude != null;
+        }
+
+        boolean hasSomeEnds() {
+            return originLatitude != null || originLongitude != null || destinationLatitude != null
+                    || destinationLongitude != null;
+        }
     }
 
     /** The shipment, and whether this request created it or found it from an earlier one. */
@@ -91,7 +127,7 @@ public class ShipmentService {
     }
 
     public record LegView(int sequenceNo, TransportMode mode, String origin, String destination, double distanceKm,
-            String carrierReference) {
+            DistanceSource distanceSource, String carrierReference) {
     }
 
     /**
@@ -110,9 +146,8 @@ public class ShipmentService {
                 request.consignorName(), request.consigneeName(), request.equipmentCode(), request.sscc(),
                 request.incoterm(), request.origin(), request.destination(), request.destinationGln(),
                 request.grossWeightKg(),
-                request.legs().stream()
-                        .map(leg -> new Shipment.PlannedLeg(leg.mode(), leg.origin(), leg.destination(),
-                                leg.distanceKm(), leg.carrierReference()))
+                IntStream.range(0, request.legs().size())
+                        .mapToObj(i -> plannedLeg(i + 1, request.legs().get(i)))
                         .toList()));
         String reference = candidate.getCustomerOrderReference();
         if (reference == null) {
@@ -124,6 +159,56 @@ public class ShipmentService {
         } catch (DataIntegrityViolationException lostRace) {
             return transactions.execute(status -> existing(reference, candidate).orElseThrow(() -> lostRace));
         }
+    }
+
+    /**
+     * A leg's distance: the planner's, or (flow 1) routing's from the leg's ends. Asked before any
+     * transaction starts, so no database connection waits for routing.
+     *
+     * @throws IllegalArgumentException if the leg has neither, or ends on a leg that is not by road
+     */
+    private Shipment.PlannedLeg plannedLeg(int number, NewLeg leg) {
+        if (leg.hasSomeEnds() && !leg.hasEnds()) {
+            throw new IllegalArgumentException("Leg " + number + " needs all four coordinates of its ends, or none");
+        }
+        Shipment.LegEnds ends = leg.hasEnds()
+                ? new Shipment.LegEnds(leg.originLatitude(), leg.originLongitude(), leg.destinationLatitude(),
+                        leg.destinationLongitude())
+                : null;
+        if (leg.distanceKm() != null) {
+            return new Shipment.PlannedLeg(leg.mode(), leg.origin(), leg.destination(), leg.distanceKm(),
+                    leg.carrierReference(), DistanceSource.GIVEN, ends);
+        }
+        if (ends == null) {
+            throw new IllegalArgumentException("Leg " + number + " needs its distanceKm, or the coordinates of its ends");
+        }
+        if (leg.mode() != TransportMode.ROAD) {
+            throw new IllegalArgumentException("Leg " + number + " goes by " + leg.mode()
+                    + ": only a road leg's distance can be worked out from its ends; give its distanceKm");
+        }
+        return roadDistance(number, leg, ends);
+    }
+
+    private Shipment.PlannedLeg roadDistance(int number, NewLeg leg, Shipment.LegEnds ends) {
+        DistanceLookup lookup = distances.getIfAvailable();
+        if (lookup != null) {
+            try {
+                double km = lookup.roadKm(ends.originLatitude(), ends.originLongitude(), ends.destinationLatitude(),
+                        ends.destinationLongitude());
+                if (km > 0) {
+                    return new Shipment.PlannedLeg(leg.mode(), leg.origin(), leg.destination(), km,
+                            leg.carrierReference(), DistanceSource.ROUTING, ends);
+                }
+                log.warn("Routing answered {} km for leg {}; using the straight-line estimate", km, number);
+            } catch (RuntimeException unavailable) {
+                log.warn("Routing did not answer for leg {} ({}); using the straight-line estimate", number,
+                        unavailable.toString());
+            }
+        }
+        double estimate = GeoDistance.estimatedRoadKm(ends.originLatitude(), ends.originLongitude(),
+                ends.destinationLatitude(), ends.destinationLongitude());
+        return new Shipment.PlannedLeg(leg.mode(), leg.origin(), leg.destination(), estimate,
+                leg.carrierReference(), DistanceSource.ESTIMATE, ends);
     }
 
     /** The order number is known: the same plan again gets its shipment, another plan a 409. */
@@ -217,6 +302,6 @@ public class ShipmentService {
 
     private static LegView view(TransportLeg leg) {
         return new LegView(leg.getSequenceNo(), leg.getMode(), leg.getOrigin(), leg.getDestination(),
-                leg.getDistanceKm(), leg.getCarrierReference());
+                leg.getDistanceKm(), leg.getDistanceSource(), leg.getCarrierReference());
     }
 }
