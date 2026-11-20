@@ -1,0 +1,38 @@
+# Every push and pull request: build and test (the same build.sh as locally).
+# On a push to main: publish the images this push changed to GHCR and record their tags in
+# deploy/apps/*/image-local.yaml. "Run workflow" (workflow_dispatch) publishes all of them: for
+# a change in a repository this one builds on, which a push here cannot see.
+#
+# The steps are ff-logistic-runtime's reusable workflows, the same for every repository.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ffetih/ff-logistic-runtime/.github/workflows/java-build.yml@main
+    with:
+      prebuild: base
+
+  publish:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      packages: write
+    uses: ffetih/ff-logistic-runtime/.github/workflows/java-publish.yml@main
+    with:
+      force: ${{ github.event_name == 'workflow_dispatch' }}
+      images: |
+        identity identity
