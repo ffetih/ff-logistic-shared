@@ -25,6 +25,6 @@ class TransportationMigrationsTest {
                 "select \"version\" from transportation_flyway_history where \"type\" = 'SQL' order by \"installed_rank\"",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2");
+        assertThat(versions).containsExactly("1", "2", "3");
     }
 }

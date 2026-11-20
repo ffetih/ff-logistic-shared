@@ -134,8 +134,26 @@ public class Shipment extends TenantAwareEntity {
             String destinationGln, double grossWeightKg, List<PlannedLeg> legs) {
     }
 
+    /**
+     * A leg as booked.
+     *
+     * @param distanceSource where {@code distanceKm} came from
+     * @param ends           the coordinates of the leg's two ends; null when it was planned by its
+     *                       distance only
+     */
     public record PlannedLeg(TransportMode mode, String origin, String destination, double distanceKm,
-            String carrierReference) {
+            String carrierReference, DistanceSource distanceSource, LegEnds ends) {
+
+        /** A leg whose distance the planner gave. */
+        public PlannedLeg(TransportMode mode, String origin, String destination, double distanceKm,
+                String carrierReference) {
+            this(mode, origin, destination, distanceKm, carrierReference, DistanceSource.GIVEN, null);
+        }
+    }
+
+    /** Where a leg starts and ends, in degrees. */
+    public record LegEnds(double originLatitude, double originLongitude, double destinationLatitude,
+            double destinationLongitude) {
     }
 
     /**
@@ -188,8 +206,7 @@ public class Shipment extends TenantAwareEntity {
             if (leg.distanceKm() <= 0) {
                 throw new IllegalArgumentException("Leg " + (shipment.legs.size() + 1) + " needs a distance above 0 km");
             }
-            shipment.legs.add(new TransportLeg(shipment.legs.size() + 1, leg.mode(), leg.origin().trim(),
-                    leg.destination().trim(), leg.distanceKm(), leg.carrierReference().trim()));
+            shipment.legs.add(new TransportLeg(shipment.legs.size() + 1, leg));
             expectedOrigin = leg.destination().trim();
         }
         if (!expectedOrigin.equalsIgnoreCase(shipment.destination)) {
@@ -236,11 +253,19 @@ public class Shipment extends TenantAwareEntity {
                 && IntStream.range(0, legs.size()).allMatch(i -> sameLeg(legs.get(i), other.legs.get(i)));
     }
 
+    /**
+     * A leg booked by its ends is the same leg when its ends are, whatever distance it got: a
+     * request repeated while routing does not answer gets the estimate, where the first one got the
+     * road distance, and is still the same request (flow 1).
+     */
     private static boolean sameLeg(TransportLeg a, TransportLeg b) {
+        boolean sameDistance = a.getEnds() != null || b.getEnds() != null
+                ? Objects.equals(a.getEnds(), b.getEnds())
+                : Double.compare(a.getDistanceKm(), b.getDistanceKm()) == 0;
         return a.getMode() == b.getMode()
                 && a.getOrigin().equals(b.getOrigin())
                 && a.getDestination().equals(b.getDestination())
-                && Double.compare(a.getDistanceKm(), b.getDistanceKm()) == 0
+                && sameDistance
                 && Objects.equals(a.getCarrierReference(), b.getCarrierReference());
     }
 

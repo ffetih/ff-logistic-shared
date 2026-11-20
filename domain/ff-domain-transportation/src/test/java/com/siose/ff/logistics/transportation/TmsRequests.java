@@ -28,6 +28,23 @@ public final class TmsRequests {
                 .replaceFirst("\\{", "{\"destinationGln\": \"" + destinationGln + "\", ");
     }
 
+    /**
+     * 800 kg by van from the Hadimkoy hub to a shop in Esenyurt, one road leg given by its ends
+     * (flow 1): 9.87 km by the straight-line estimate.
+     */
+    public static String roadByEnds(String reference) {
+        return """
+                {"customerOrderReference": "%s", "consignorName": "FF Hadimkoy", "consigneeName": "Esenyurt Depot Shop",
+                 "equipmentCode": "CSQU3054383", "sscc": "106141411234567897", "incoterm": "DAP",
+                 "origin": "Hadimkoy Hub", "destination": "Esenyurt", "grossWeightKg": 800,
+                 "legs": [
+                   {"mode": "ROAD", "origin": "Hadimkoy Hub", "destination": "Esenyurt",
+                    "originLatitude": 41.10, "originLongitude": 28.65,
+                    "destinationLatitude": 41.03, "destinationLongitude": 28.67,
+                    "carrierReference": "TR-34-FF-0417"}]}
+                """.formatted(reference);
+    }
+
     /** The same shipment, booked under a customer order number. */
     public static String order(String reference) {
         return shipment("CSQU3054383", "106141411234567897", "Cologne Eifeltor")
