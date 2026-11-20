@@ -12,9 +12,8 @@
     </parent>
 
     <!--
-        A domain core (decision 2): the Standards area, written once, run by the modulith and by its
-        service. It depends on ff-domain-standards and on nothing else of the business: what it
-        needs from another area is a port, fulfilled by whichever implementation runs it.
+        A domain core (decision 2): the logistics standards every other area may use. Pure functions,
+        no Spring, no database: it depends on nothing of the business, and on nothing at run time.
     -->
     <groupId>com.siose.ff</groupId>
     <artifactId>ff-domain-standards</artifactId>
@@ -27,6 +26,17 @@
         <dependency>
             <groupId>org.springframework.modulith</groupId>
             <artifactId>spring-modulith-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
