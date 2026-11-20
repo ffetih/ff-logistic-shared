@@ -33,13 +33,104 @@
             <artifactId>ff-domain-standards</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!--
+            What the area's code compiles against: the APIs, not the starters. The application that
+            runs the area (the modulith or the routing service) brings the implementations.
+        -->
         <dependency>
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-persistence</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-web</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+        <!-- The road matrix in use, chosen by a setting (@ConditionalOnProperty) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <!-- Orders longer routes, and routes with time windows; version from the base BOM -->
+        <dependency>
+            <groupId>ai.timefold.solver</groupId>
+            <artifactId>timefold-solver-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
+        <!--
+            The area's tests run here, once: a small Spring Boot application in src/test with the
+            same chassis as the real ones, on an in-memory database migrated by the area's own
+            scripts. The modulith and the service only check that they serve the area and wire its flows.
+        -->
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-app</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-security</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
