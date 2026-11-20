@@ -29,8 +29,8 @@ Each core is a plain library under `com.siose.ff.logistics.<area>`: its `package
 | Core | What it holds | Since
 
 | `ff-domain-standards` | Pure functions: GS1 check digits and SSCCs, ISO 6346 container codes, transport modes and the EN 16258 / ISO 14083 emissions calculator, great-circle distances | S3
-| `ff-domain-warehousing` | Warehouses, bins, ASNs, receiving into SSCC-labelled pallets: entities, repositories, use cases, the REST API under `/api/v1/wms`, and the `wms_*` tables' migrations | S3
-| `ff-domain-transportation` | (S4) |
+| `ff-domain-warehousing` | Warehouses, bins, ASNs, receiving into SSCC-labelled pallets: entities, repositories, use cases, the REST API under `/api/v1/wms`, and the `wms_*` tables' migrations (S3). Its API: `InboundArrivals.open(ShipmentArrival)`, which a delivery opens at the dock (S4) | S3
+| `ff-domain-transportation` | Shipments over multimodal legs, their lifecycle and CO2e footprint, the REST API under `/api/v1/tms`, the `tms_*` tables; its API: the events `ShipmentProgressed` and `ShipmentDelivered` | S4
 | `ff-domain-routing` | (S5) |
 |===
 
