@@ -63,6 +63,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
+        <!-- @Externalized on the area's events: which Kafka topic they go to, where a process sends them -->
+        <dependency>
+            <groupId>org.springframework.modulith</groupId>
+            <artifactId>spring-modulith-events-api</artifactId>
+        </dependency>
         <!-- Orders longer routes, and routes with time windows; version from the base BOM -->
         <dependency>
             <groupId>ai.timefold.solver</groupId>

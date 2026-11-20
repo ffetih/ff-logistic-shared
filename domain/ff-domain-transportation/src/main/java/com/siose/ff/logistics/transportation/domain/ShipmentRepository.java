@@ -11,4 +11,6 @@ public interface ShipmentRepository extends JpaRepository<Shipment, UUID> {
     List<Shipment> findAllByOrderByCreatedAtDesc();
 
     Optional<Shipment> findByCustomerOrderReference(String customerOrderReference);
+
+    Optional<Shipment> findByShipmentNumber(String shipmentNumber);
 }

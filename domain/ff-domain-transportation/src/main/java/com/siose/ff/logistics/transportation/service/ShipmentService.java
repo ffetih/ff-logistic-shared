@@ -267,11 +267,16 @@ public class ShipmentService {
     public ShipmentView deliver(UUID id, Delivery delivery) {
         Shipment shipment = shipment(id);
         shipment.deliver(Instant.now(), delivery.receivedBy());
-        events.publishEvent(new ShipmentDelivered(shipment.getId(), shipment.getTenantId(),
-                shipment.getShipmentNumber(), shipment.getCustomerOrderReference(), shipment.getTotalDistanceKm(),
-                shipment.getSavedCo2eKg(), shipment.getDeliveredAt(), shipment.getDestinationGln(),
-                shipment.getSscc(), shipment.getGrossWeightKg()));
+        events.publishEvent(delivered(shipment));
         return view(shipment);
+    }
+
+    /** The event of a delivery, by the API or from a route stop (flow 3): the same either way. */
+    static ShipmentDelivered delivered(Shipment shipment) {
+        return new ShipmentDelivered(shipment.getId(), shipment.getTenantId(), shipment.getShipmentNumber(),
+                shipment.getCustomerOrderReference(), shipment.getTotalDistanceKm(), shipment.getSavedCo2eKg(),
+                shipment.getDeliveredAt(), shipment.getDestinationGln(), shipment.getSscc(),
+                shipment.getGrossWeightKg());
     }
 
     @Transactional(readOnly = true)

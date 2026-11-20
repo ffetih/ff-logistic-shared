@@ -78,9 +78,11 @@ public class RoutePlan extends TenantAwareEntity {
      *
      * @param readyMinutes earliest arrival, in minutes after departure; with {@code dueMinutes} or not at all
      * @param dueMinutes   latest arrival; the vehicle waits if it is early, and may not be late
+     * @param shipmentNumber the transportation shipment this stop delivers, or {@code null} (flow 3)
      */
     public record Stop(String stopCode, String customerName, double latitude, double longitude,
-            double demandWeightKg, int serviceMinutes, Integer readyMinutes, Integer dueMinutes) {
+            double demandWeightKg, int serviceMinutes, Integer readyMinutes, Integer dueMinutes,
+            String shipmentNumber) {
 
         public boolean hasTimeWindow() {
             return readyMinutes != null;
@@ -223,5 +225,21 @@ public class RoutePlan extends TenantAwareEntity {
 
     public List<RouteStop> getStops() {
         return List.copyOf(stops);
+    }
+
+    /**
+     * Completes one of the plan's stops (flow 3 starts here).
+     *
+     * @throws IllegalArgumentException if the plan has no stop with that code
+     * @throws GeoConflictException     if the stop is already completed
+     */
+    public RouteStop completeStop(String stopCode, java.time.Instant at, String receivedBy) {
+        RouteStop stop = stops.stream()
+                .filter(s -> s.getStopCode().equalsIgnoreCase(stopCode.trim()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Route " + routeNumber + " has no stop " + stopCode.trim()));
+        stop.complete(routeNumber, at, receivedBy);
+        return stop;
     }
 }
