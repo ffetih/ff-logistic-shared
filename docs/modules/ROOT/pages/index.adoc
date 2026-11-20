@@ -24,6 +24,18 @@ flowchart BT
 
 Each core is a plain library under `com.siose.ff.logistics.<area>`: its `package-info.java` names the module and what it may use, and its `<Area>Area` configuration declares the area's migrations (`db/migration/<area>`, history table `<area>_flyway_history`). An application in `com.siose.ff.logistics` picks the cores up by component scanning, whether it holds one (a service) or all (the modulith).
 
+[cols="2,4,1",options="header"]
+|===
+| Core | What it holds | Since
+
+| `ff-domain-standards` | Pure functions: GS1 check digits and SSCCs, ISO 6346 container codes, transport modes and the EN 16258 / ISO 14083 emissions calculator, great-circle distances | S3
+| `ff-domain-warehousing` | Warehouses, bins, ASNs, receiving into SSCC-labelled pallets: entities, repositories, use cases, the REST API under `/api/v1/wms`, and the `wms_*` tables' migrations | S3
+| `ff-domain-transportation` | (S4) |
+| `ff-domain-routing` | (S5) |
+|===
+
+A core with business rules tests them itself, once: a small Spring Boot application in its `src/test` (the same chassis as the real ones, an in-memory database migrated by the area's own scripts) runs the area's API tests. The modulith and the services only check that they serve the area.
+
 [source,bash]
 ----
 ./build.sh          # after ../base/build.sh: installs the cores and builds identity
