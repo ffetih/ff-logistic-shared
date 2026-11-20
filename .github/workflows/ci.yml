@@ -24,6 +24,8 @@ jobs:
     uses: ffetih/ff-logistic-runtime/.github/workflows/java-build.yml@main
     with:
       prebuild: base
+      # The identity tests read runtime's Keycloak realm file (KeycloakRealmTest)
+      siblings: runtime
 
   publish:
     needs: build
