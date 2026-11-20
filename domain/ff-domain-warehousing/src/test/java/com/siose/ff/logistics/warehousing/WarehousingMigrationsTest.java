@@ -25,6 +25,6 @@ class WarehousingMigrationsTest {
                 "select \"version\" from warehousing_flyway_history where \"type\" = 'SQL' order by \"installed_rank\"",
                 String.class);
 
-        assertThat(versions).containsExactly("1", "2", "3");
+        assertThat(versions).containsExactly("1", "2", "3", "4");
     }
 }

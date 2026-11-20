@@ -1,6 +1,7 @@
 package com.siose.ff.logistics.warehousing.domain;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, UUID> {
     boolean existsByCode(String code);
 
     boolean existsByGln(String gln);
+
+    Optional<Warehouse> findByGln(String gln);
 }
