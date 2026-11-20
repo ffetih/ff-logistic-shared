@@ -3,10 +3,13 @@ package com.siose.ff.logistics.routing.domain;
 import com.siose.ff.base.persistence.TenantAwareEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.UUID;
 
 /** One stop of a route plan, in driving order. Created only through {@link RoutePlan}. */
@@ -46,6 +49,18 @@ public class RouteStop extends TenantAwareEntity {
 
     private Integer dueMinutes;
 
+    /** The transportation shipment this stop delivers; null for one that delivers none. */
+    @Column(length = 20)
+    private String shipmentNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private StopStatus status = StopStatus.PLANNED;
+
+    private Instant completedAt;
+
+    @Column(length = 140)
+    private String receivedBy;
 
     protected RouteStop() {
     }
@@ -62,6 +77,37 @@ public class RouteStop extends TenantAwareEntity {
         this.arrivalMinutes = arrivalMinutes;
         this.readyMinutes = stop.readyMinutes();
         this.dueMinutes = stop.dueMinutes();
+        this.shipmentNumber = stop.shipmentNumber() == null ? null : stop.shipmentNumber().trim();
+    }
+
+    /**
+     * The goods were handed over: once only.
+     *
+     * @throws GeoConflictException if the stop is already completed
+     */
+    void complete(String routeNumber, Instant at, String receivedBy) {
+        if (status == StopStatus.COMPLETED) {
+            throw GeoConflictException.stopAlreadyCompleted(routeNumber, stopCode);
+        }
+        status = StopStatus.COMPLETED;
+        completedAt = at;
+        this.receivedBy = receivedBy.trim();
+    }
+
+    public String getShipmentNumber() {
+        return shipmentNumber;
+    }
+
+    public StopStatus getStatus() {
+        return status;
+    }
+
+    public Instant getCompletedAt() {
+        return completedAt;
+    }
+
+    public String getReceivedBy() {
+        return receivedBy;
     }
 
     public UUID getId() {

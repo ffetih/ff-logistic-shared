@@ -3,6 +3,7 @@ package com.siose.ff.logistics.routing.api;
 import com.siose.ff.logistics.routing.service.RoutePlanService;
 import com.siose.ff.logistics.routing.service.RoutePlanService.NewRoute;
 import com.siose.ff.logistics.routing.service.RoutePlanService.RoutePlanView;
+import com.siose.ff.logistics.routing.service.RoutePlanService.StopCompletion;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -42,5 +43,15 @@ public class RoutePlanController {
     @GetMapping("/{id}")
     public RoutePlanView get(@PathVariable UUID id) {
         return service.get(id);
+    }
+
+    /**
+     * The goods were handed over at a stop and signed for. 409 {@code stop-status-conflict} if the
+     * stop was completed before; its shipment, if it names one, is delivered (flow 3).
+     */
+    @PostMapping("/{id}/stops/{stopCode}/completion")
+    public RoutePlanView completeStop(@PathVariable UUID id, @PathVariable String stopCode,
+            @Valid @RequestBody StopCompletion completion) {
+        return service.completeStop(id, stopCode, completion);
     }
 }

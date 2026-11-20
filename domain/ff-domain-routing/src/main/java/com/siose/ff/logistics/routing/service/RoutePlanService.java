@@ -1,5 +1,7 @@
 package com.siose.ff.logistics.routing.service;
 
+import com.siose.ff.logistics.routing.RouteStopCompleted;
+import com.siose.ff.logistics.routing.domain.StopStatus;
 import com.siose.ff.base.persistence.DatabaseSequences;
 import com.siose.ff.base.web.ResourceNotFoundException;
 import com.siose.ff.logistics.routing.domain.RoutePlan;
@@ -23,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,9 +41,12 @@ public class RoutePlanService {
     private final RoutePlanner planner;
     private final DatabaseSequences sequences;
     private final int maxStops;
+    private final ApplicationEventPublisher events;
 
     RoutePlanService(RoutePlanRepository plans, TerritoryRepository territories, RoutePlanner planner,
-            DatabaseSequences sequences, @Value("${ff.routing.max-stops:99}") int maxStops) {
+            DatabaseSequences sequences, @Value("${ff.routing.max-stops:99}") int maxStops,
+            ApplicationEventPublisher events) {
+        this.events = events;
         this.plans = plans;
         this.territories = territories;
         this.planner = planner;
@@ -66,7 +72,12 @@ public class RoutePlanService {
             @NotNull @Positive Double demandWeightKg,
             @NotNull @PositiveOrZero @Max(600) Integer serviceMinutes,
             @PositiveOrZero @Max(1440) Integer readyMinutes,
-            @PositiveOrZero @Max(1440) Integer dueMinutes) {
+            @PositiveOrZero @Max(1440) Integer dueMinutes,
+            @Size(max = 20) String shipmentNumber) {
+    }
+
+    /** Who signed for the goods at the stop. */
+    public record StopCompletion(@NotBlank @Size(max = 140) String receivedBy) {
     }
 
     public record RoutePlanView(UUID id, String tenantId, String routeNumber, String territoryCode,
@@ -77,7 +88,8 @@ public class RoutePlanService {
 
     public record StopView(UUID id, int sequenceNo, String stopCode, String customerName, double latitude,
             double longitude, double demandWeightKg, int serviceMinutes, Integer readyMinutes, Integer dueMinutes,
-            double legDistanceKm, int arrivalMinutes) {
+            double legDistanceKm, int arrivalMinutes, String shipmentNumber, StopStatus status, Instant completedAt,
+            String receivedBy) {
     }
 
     /**
@@ -99,7 +111,7 @@ public class RoutePlanService {
         List<RoutePlan.Stop> stops = request.stops().stream()
                 .map(stop -> new RoutePlan.Stop(stop.stopCode(), stop.customerName(), stop.latitude(),
                         stop.longitude(), stop.demandWeightKg(), stop.serviceMinutes(), stop.readyMinutes(),
-                        stop.dueMinutes()))
+                        stop.dueMinutes(), blankToNull(stop.shipmentNumber())))
                 .toList();
         RoutePlan.checkStops(stops, request.vehicleCapacityKg());
 
@@ -120,6 +132,22 @@ public class RoutePlanService {
                 route.totalMinutes());
         plan.assignNumber(sequences.next(ROUTE_SEQUENCE));
         return view(plans.save(plan));
+    }
+
+    /**
+     * The goods were handed over at a stop. The event is published in the same transaction as the
+     * stop's new status: the outbox stores it with the commit, and the transportation area delivers
+     * the stop's shipment from it (flow 3), in the modulith by a listener, between the services
+     * over Kafka. A second completion of the same stop is a 409.
+     */
+    @Transactional
+    public RoutePlanView completeStop(UUID routeId, String stopCode, StopCompletion completion) {
+        RoutePlan plan = plans.findById(routeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Route plan " + routeId + " not found"));
+        RouteStop stop = plan.completeStop(stopCode, Instant.now(), completion.receivedBy());
+        events.publishEvent(new RouteStopCompleted(plan.getId(), plan.getTenantId(), plan.getRouteNumber(),
+                stop.getStopCode(), stop.getShipmentNumber(), stop.getReceivedBy(), stop.getCompletedAt()));
+        return view(plan);
     }
 
     @Transactional(readOnly = true)
@@ -143,6 +171,11 @@ public class RoutePlanService {
     private static StopView view(RouteStop s) {
         return new StopView(s.getId(), s.getSequenceNo(), s.getStopCode(), s.getCustomerName(), s.getLatitude(),
                 s.getLongitude(), s.getDemandWeightKg(), s.getServiceMinutes(), s.getReadyMinutes(), s.getDueMinutes(),
-                s.getLegDistanceKm(), s.getArrivalMinutes());
+                s.getLegDistanceKm(), s.getArrivalMinutes(), s.getShipmentNumber(), s.getStatus(), s.getCompletedAt(),
+                s.getReceivedBy());
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

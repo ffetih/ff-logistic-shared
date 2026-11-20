@@ -6,7 +6,9 @@
  * {@code standards} and nothing else of the business directly.
  *
  * <p>Its API is this package: {@link com.siose.ff.logistics.routing.RoadDistances}, the road distance
- * between two points, which transportation asks for its road legs (flow 1).
+ * between two points, which transportation asks for its road legs (flow 1), and the event
+ * {@link com.siose.ff.logistics.routing.RouteStopCompleted}, from which transportation delivers the
+ * stop's shipment (flow 3).
  *
  * <p>{@code api} holds the REST controllers (under {@code /api/v1/geo}), {@code domain} the entities
  * and repositories, {@code planning} the ordering and the road distances (nearest neighbour, or

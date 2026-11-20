@@ -19,6 +19,11 @@ public class GeoConflictException extends ConflictException {
                 "Territory " + code + " already exists");
     }
 
+    public static GeoConflictException stopAlreadyCompleted(String routeNumber, String stopCode) {
+        return new GeoConflictException("stop-status-conflict", "Stop Status Conflict",
+                "Stop " + stopCode + " of " + routeNumber + " is already COMPLETED");
+    }
+
     @Override
     public String problemSlug() {
         return slug;
