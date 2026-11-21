@@ -20,5 +20,6 @@
         <module>domain/ff-domain-transportation</module>
         <module>domain/ff-domain-routing</module>
         <module>identity</module>
+        <module>analytics-loader</module>
     </modules>
 </project>

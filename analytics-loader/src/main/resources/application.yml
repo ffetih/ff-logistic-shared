@@ -1,0 +1,69 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: analytics-loader
+  threads:
+    virtual:
+      enabled: true
+  # The analytics database, ff_logistics_analytics, on the cluster's PostgreSQL (NodePort 5432 from
+  # the IDE). The loader is its only writer and owns its schema; the chart's database Job creates
+  # the database, and its migrate Job the tables. In the cluster the values set ANALYTICS_DB_*.
+  datasource:
+    url: ${ANALYTICS_DB_URL:jdbc:postgresql://localhost:5432/ff_logistics_analytics}
+    username: ${ANALYTICS_DB_USERNAME:fflogistics}
+    password: ${ANALYTICS_DB_PASSWORD:fflogisticsDb2026}
+  flyway:
+    enabled: true
+  # KAFKA_BOOTSTRAP_SERVERS (kafka:9092) in the cluster; from the IDE, the cluster's broker on
+  # localhost:9094.
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      # One consumer group per reader, named after it, like the services' (transportation,
+      # warehousing): the loader reads every message once, whatever its pods.
+      group-id: analytics
+      # A new group starts at the oldest message: deliveries sent before the loader's first start
+      # are loaded too.
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        # The topics are the product's. If the loader starts before the first delivery creates
+        # them, it subscribes within 30 s of their creation instead of Kafka's default 5 minutes.
+        metadata.max.age.ms: 30000
+    producer:
+      # For the dead-letter topic only.
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    admin:
+      # The dead-letter topic is created at the start; without a broker, the start is held 5 s.
+      operation-timeout: 5s
+      close-timeout: 2s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    git:
+      mode: simple
+
+ff:
+  kafka:
+    # The dead-letter topic's partitions and replicas, as the services' (one broker locally).
+    partitions: 3
+    replicas: ${KAFKA_REPLICAS:1}
+
+analytics:
+  loader:
+    # Waiting for the database while it is down: first pause, doubled up to this, without end.
+    retry-first-delay: ${ANALYTICS_LOADER_RETRY_FIRST_DELAY:PT1S}
+    retry-max-delay: ${ANALYTICS_LOADER_RETRY_MAX_DELAY:PT30S}
