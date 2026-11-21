@@ -62,6 +62,10 @@ public class RouteStop extends TenantAwareEntity {
     @Column(length = 140)
     private String receivedBy;
 
+    /** Where the consignee's signature (PNG) lives in object storage; null until a link was asked for. */
+    @Column(length = 300)
+    private String epodDocumentUri;
+
     protected RouteStop() {
     }
 
@@ -108,6 +112,18 @@ public class RouteStop extends TenantAwareEntity {
 
     public String getReceivedBy() {
         return receivedBy;
+    }
+
+    public String getEpodDocumentUri() {
+        return epodDocumentUri;
+    }
+
+    /** Reserves the proof of delivery's location; once, the first time a link is asked for. */
+    public void reserveProofOfDelivery(String objectUri) {
+        if (epodDocumentUri != null) {
+            throw new IllegalStateException("Stop " + stopCode + " has its proof of delivery location already");
+        }
+        epodDocumentUri = objectUri;
     }
 
     public UUID getId() {

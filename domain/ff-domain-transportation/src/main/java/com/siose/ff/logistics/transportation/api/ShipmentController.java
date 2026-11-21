@@ -1,5 +1,7 @@
 package com.siose.ff.logistics.transportation.api;
 
+import com.siose.ff.base.storage.DocumentTransfer;
+import com.siose.ff.logistics.transportation.service.ConsignmentNoteService;
 import com.siose.ff.logistics.transportation.service.ShipmentService;
 import com.siose.ff.logistics.transportation.service.ShipmentService.Delivery;
 import com.siose.ff.logistics.transportation.service.ShipmentService.NewShipment;
@@ -24,9 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ShipmentController {
 
     private final ShipmentService service;
+    private final ConsignmentNoteService notes;
 
-    public ShipmentController(ShipmentService service) {
+    public ShipmentController(ShipmentService service, ConsignmentNoteService notes) {
         this.service = service;
+        this.notes = notes;
     }
 
     /**
@@ -65,5 +69,20 @@ public class ShipmentController {
     @GetMapping("/{id}")
     public ShipmentView get(@PathVariable UUID id) {
         return service.get(id);
+    }
+
+    /**
+     * Where the client PUTs the signed e-CMR (PDF), with the headers the answer names; valid 15
+     * minutes. Refused with 409 once it is stored: documents are written once.
+     */
+    @PostMapping("/{id}/ecmr/upload-link")
+    public DocumentTransfer ecmrUploadLink(@PathVariable UUID id) {
+        return notes.uploadLink(id);
+    }
+
+    /** Where the client GETs the signed e-CMR; 404 until it is uploaded. */
+    @GetMapping("/{id}/ecmr/download-link")
+    public DocumentTransfer ecmrDownloadLink(@PathVariable UUID id) {
+        return notes.downloadLink(id);
     }
 }

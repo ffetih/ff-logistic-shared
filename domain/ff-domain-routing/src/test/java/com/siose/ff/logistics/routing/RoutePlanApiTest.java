@@ -145,4 +145,15 @@ class RoutePlanApiTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.type").value("urn:siose-ff:problem:invalid-payload"));
     }
+
+    @Test
+    void noDocumentLinksWithoutAStore() throws Exception {
+        String body = mvc.perform(json("/api/v1/geo/routes", route("IST-EU", fourStops())).with(as(tenant, "DISPATCHER")))
+                .andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post(
+                        "/api/v1/geo/routes/" + com.jayway.jsonpath.JsonPath.read(body, "$.id") + "/stops/IST-ESN/epod/upload-link")
+                        .with(as(tenant, "DISPATCHER")))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.type").value(org.hamcrest.Matchers.endsWith("object-store-unavailable")));
+    }
 }
