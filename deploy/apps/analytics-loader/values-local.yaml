@@ -1,0 +1,23 @@
+# The analytics loader on the local k3d cluster. Read after values.yaml, so it wins.
+service:
+  type: NodePort
+  nodePort: 30086 # host port 8086
+
+# Every variable in one list: Helm replaces lists, it does not merge them. The loader connects as
+# the server's owner (postgres-credentials): it writes every tenant's rows, so row-level security
+# must not restrict it (S06-02).
+env:
+  - name: ANALYTICS_DB_URL
+    value: jdbc:postgresql://postgres:5432/ff_logistics_analytics
+  - name: ANALYTICS_DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: postgres-credentials
+        key: username
+  - name: ANALYTICS_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-credentials
+        key: password
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    value: kafka:9092

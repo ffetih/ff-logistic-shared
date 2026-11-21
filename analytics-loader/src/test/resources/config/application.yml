@@ -1,0 +1,6 @@
+# Test overrides, read after src/main/resources/application.yml. The database and the broker come
+# from AnalyticsTestSupport; here only what every test wants.
+logging:
+  level:
+    # The Kafka client prints its whole configuration for every client it creates.
+    org.apache.kafka: warn

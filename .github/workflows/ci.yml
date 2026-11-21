@@ -38,3 +38,4 @@ jobs:
       force: ${{ github.event_name == 'workflow_dispatch' }}
       images: |
         identity identity
+        analytics-loader analytics-loader

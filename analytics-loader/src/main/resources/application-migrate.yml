@@ -1,0 +1,10 @@
+# The PreSync hook Job (deploy/charts/ff-service/templates/job-migrate.yaml): no web server, no
+# consumers, Flyway on. AnalyticsLoaderApplication exits as soon as the migration is done.
+spring:
+  main:
+    web-application-type: none
+  flyway:
+    enabled: true
+  kafka:
+    listener:
+      auto-startup: false
