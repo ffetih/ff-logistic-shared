@@ -3,6 +3,7 @@ package com.siose.ff.analytics.loader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -56,8 +57,8 @@ class ShipmentDeliveredLoadingTest extends AnalyticsTestSupport {
         assertThat(row).containsEntry("tenant_id", "ff-eu-freight")
                 .containsEntry("shipment_number", "SHP-10042")
                 .containsEntry("customer_order_reference", "PO-4711")
-                .containsEntry("total_distance_km", 2580.0)
-                .containsEntry("saved_co2e_kg", 1912.9);
+                .containsEntry("total_distance_km", new BigDecimal("2580.000"))
+                .containsEntry("saved_co2e_kg", new BigDecimal("1912.900"));
         assertThat(((Timestamp) row.get("delivered_at")).toInstant()).isEqualTo(Instant.parse("2026-11-19T10:15:30Z"));
 
         // One key, one partition: the second copy is read before the next message. Still one row.
