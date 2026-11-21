@@ -3,6 +3,7 @@ package com.siose.ff.analytics.loader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.siose.ff.contracts.EventContract;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,18 @@ class ShipmentDeliveredMessageTest {
 
         assertThat(message).isEqualTo(new ShipmentDeliveredMessage(id, "ff-eu-freight", "SHP-10042", "PO-4711",
                 2580.0, 1912.9, Instant.parse("2026-11-19T10:15:30Z")));
+    }
+
+    /** The contract's example (ff-contracts): what the modulith and the services are tested to send. */
+    @Test
+    void readsTheContractsExample() {
+        EventContract contract = EventContract.of(ShipmentDeliveredMessage.TOPIC);
+
+        ShipmentDeliveredMessage message = ShipmentDeliveredMessage.parse(contract.example(), mapper);
+
+        assertThat(message.shipmentId()).hasToString(contract.exampleKey());
+        assertThat(message.tenantId()).isEqualTo("ff-eu-freight");
+        assertThat(message.deliveredAt()).isEqualTo(Instant.parse("2026-11-20T23:41:26.761285Z"));
     }
 
     @Test

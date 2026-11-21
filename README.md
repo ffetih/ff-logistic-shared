@@ -12,6 +12,7 @@ Part of **[FF Logistic](https://github.com/ffetih/ff-logistic-docs)**: one logis
 | `domain/ff-domain-warehousing` | Warehouses, bins, ASNs, receiving into SSCC-labelled pallets; REST under `/api/v1/wms` |
 | `domain/ff-domain-transportation` | Shipments over multimodal legs, their lifecycle, CO2e footprint and e-CMR; REST under `/api/v1/tms` |
 | `domain/ff-domain-routing` | Territories and route plans with time windows, optimized with Timefold; stop completion and proof of delivery; REST under `/api/v1/geo` |
+| `contracts` | What goes out on Kafka, written once: one example message per topic, and the check both implementations' tests run against what they really send (`ff-contracts`) |
 | `identity` | The facade over Keycloak: sign-in, service tokens, and the published keys every application verifies tokens against |
 | `analytics-loader` | Deliveries from Kafka into the analytics database, tenant-locked with row-level security (S6) |
 
