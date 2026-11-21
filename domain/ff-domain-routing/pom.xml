@@ -42,6 +42,11 @@
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-persistence</artifactId>
         </dependency>
+        <!-- The proof of delivery: a location in object storage, and the links to it (S05-05) -->
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-storage</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-web</artifactId>

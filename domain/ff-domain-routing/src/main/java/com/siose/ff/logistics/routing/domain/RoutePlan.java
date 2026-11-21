@@ -234,12 +234,21 @@ public class RoutePlan extends TenantAwareEntity {
      * @throws GeoConflictException     if the stop is already completed
      */
     public RouteStop completeStop(String stopCode, java.time.Instant at, String receivedBy) {
-        RouteStop stop = stops.stream()
+        RouteStop stop = stop(stopCode);
+        stop.complete(routeNumber, at, receivedBy);
+        return stop;
+    }
+
+    /**
+     * One of the plan's stops, by its code, in any case.
+     *
+     * @throws IllegalArgumentException if the plan has no stop with that code
+     */
+    public RouteStop stop(String stopCode) {
+        return stops.stream()
                 .filter(s -> s.getStopCode().equalsIgnoreCase(stopCode.trim()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Route " + routeNumber + " has no stop " + stopCode.trim()));
-        stop.complete(routeNumber, at, receivedBy);
-        return stop;
     }
 }

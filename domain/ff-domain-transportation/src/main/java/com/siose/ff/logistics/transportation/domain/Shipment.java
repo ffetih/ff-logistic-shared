@@ -117,6 +117,10 @@ public class Shipment extends TenantAwareEntity {
      * commit. The second fails, so a shipment is delivered once even when two drivers' apps
      * confirm at the same moment.
      */
+    /** Where the signed e-CMR (PDF) lives in object storage; null until a link was asked for. */
+    @Column(length = 300)
+    private String ecmrDocumentUri;
+
     @Version
     private long version;
 
@@ -362,6 +366,18 @@ public class Shipment extends TenantAwareEntity {
 
     public double getReductionPercent() {
         return reductionPercent;
+    }
+
+    public String getEcmrDocumentUri() {
+        return ecmrDocumentUri;
+    }
+
+    /** Reserves the e-CMR's location; once, the first time a link is asked for. */
+    public void reserveConsignmentNote(String objectUri) {
+        if (ecmrDocumentUri != null) {
+            throw new IllegalStateException("Shipment " + shipmentNumber + " has its e-CMR location already");
+        }
+        ecmrDocumentUri = objectUri;
     }
 
     public ShipmentStatus getStatus() {
