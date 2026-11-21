@@ -5,7 +5,7 @@ service:
 
 # Every variable in one list: Helm replaces lists, it does not merge them. The loader connects as
 # the server's owner (postgres-credentials): it writes every tenant's rows, so row-level security
-# must not restrict it (S06-02).
+# must not restrict it.
 env:
   - name: ANALYTICS_DB_URL
     value: jdbc:postgresql://postgres:5432/ff_logistics_analytics
@@ -21,3 +21,10 @@ env:
         key: password
   - name: KAFKA_BOOTSTRAP_SERVERS
     value: kafka:9092
+  # The analytics_reader role's password, which the migration (V2) sets. Dashboards connect as
+  # that role, and row-level security restricts it to the tenant a session names (S06-02).
+  - name: ANALYTICS_READER_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: analytics-reader-credentials
+        key: password

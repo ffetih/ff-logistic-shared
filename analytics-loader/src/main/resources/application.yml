@@ -16,6 +16,9 @@ spring:
     password: ${ANALYTICS_DB_PASSWORD:fflogisticsDb2026}
   flyway:
     enabled: true
+    placeholders:
+      # The reader role's password (V2), from the analytics-reader-credentials Secret in the cluster.
+      analytics_reader_password: ${ANALYTICS_READER_PASSWORD:analyticsReader2026}
   # KAFKA_BOOTSTRAP_SERVERS (kafka:9092) in the cluster; from the IDE, the cluster's broker on
   # localhost:9094.
   kafka:
@@ -67,3 +70,7 @@ analytics:
     # Waiting for the database while it is down: first pause, doubled up to this, without end.
     retry-first-delay: ${ANALYTICS_LOADER_RETRY_FIRST_DELAY:PT1S}
     retry-max-delay: ${ANALYTICS_LOADER_RETRY_MAX_DELAY:PT30S}
+  rollup:
+    # Recounts the months that received deliveries since the last run; also once at the start.
+    # Cheap (only the changed months), so it runs often. Months are UTC calendar months.
+    cron: ${ANALYTICS_ROLLUP_CRON:0 */5 * * * *}
