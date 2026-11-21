@@ -3,6 +3,7 @@ package com.siose.ff.analytics.loader;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Loads business events from Kafka into the analytics database ({@code ff_logistics_analytics}).
@@ -14,8 +15,11 @@ import org.springframework.context.ConfigurableApplicationContext;
  *
  * <p>It is shared: written once, it runs whichever implementation is active. It knows the topics and
  * the JSON on them, never the code of the side that sends them.
+ *
+ * <p>{@code @EnableScheduling}: the monthly rollup runs on a schedule ({@link MonthlyDeliveryRollup}).
  */
 @SpringBootApplication
+@EnableScheduling
 public class AnalyticsLoaderApplication {
 
     public static void main(String[] args) {

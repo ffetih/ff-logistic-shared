@@ -4,3 +4,8 @@ logging:
   level:
     # The Kafka client prints its whole configuration for every client it creates.
     org.apache.kafka: warn
+
+analytics:
+  rollup:
+    # "-" switches the schedule off: the tests run the rollup themselves, at the moment they choose.
+    cron: "-"
