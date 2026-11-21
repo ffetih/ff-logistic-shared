@@ -1,0 +1,16 @@
+{
+  "topic": "ff.logistics.geo.route-stop-completed",
+  "event": "RouteStopCompleted, of the routing area",
+  "key": "routePlanId",
+  "nullable": ["shipmentNumber"],
+  "formats": {"routePlanId": "uuid", "completedAt": "instant"},
+  "example": {
+    "routePlanId": "affc378a-1bd9-4d24-8084-aac861af7dc9",
+    "tenantId": "ff-eu-freight",
+    "routeNumber": "RTE-5003",
+    "stopCode": "IST-ESN",
+    "shipmentNumber": "SHP-10011",
+    "receivedBy": "Ayse Demir",
+    "completedAt": "2026-11-20T23:41:25.761285156Z"
+  }
+}

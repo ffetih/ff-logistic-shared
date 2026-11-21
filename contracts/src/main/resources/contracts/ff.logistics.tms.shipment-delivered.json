@@ -1,0 +1,19 @@
+{
+  "topic": "ff.logistics.tms.shipment-delivered",
+  "event": "ShipmentDelivered, of the transportation area",
+  "key": "shipmentId",
+  "nullable": ["customerOrderReference", "destinationGln", "sscc"],
+  "formats": {"shipmentId": "uuid", "deliveredAt": "instant"},
+  "example": {
+    "shipmentId": "ebfb2f25-552f-4bfc-acdb-176c338ab49b",
+    "tenantId": "ff-eu-freight",
+    "shipmentNumber": "SHP-10011",
+    "customerOrderReference": "PO-4711",
+    "totalDistanceKm": 2575.0,
+    "savedCo2eKg": 1565.1,
+    "deliveredAt": "2026-11-20T23:41:26.761285Z",
+    "destinationGln": "8690001000011",
+    "sscc": "106141411234567897",
+    "grossWeightKg": 22000.0
+  }
+}

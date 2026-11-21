@@ -1,0 +1,15 @@
+{
+  "topic": "ff.logistics.tms.shipment-progressed",
+  "event": "ShipmentProgressed, of the transportation area",
+  "key": "shipmentId",
+  "nullable": ["customerOrderReference"],
+  "formats": {"shipmentId": "uuid", "occurredAt": "instant"},
+  "example": {
+    "shipmentId": "ebfb2f25-552f-4bfc-acdb-176c338ab49b",
+    "tenantId": "ff-eu-freight",
+    "shipmentNumber": "SHP-10011",
+    "customerOrderReference": "PO-4711",
+    "stage": "DEPARTED",
+    "occurredAt": "2026-11-20T21:05:12.104331Z"
+  }
+}

@@ -2,6 +2,7 @@ package com.siose.ff.analytics.loader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
@@ -63,11 +64,25 @@ class MonthlyDeliveryRollupTest extends AnalyticsTestSupport {
         assertThat(rollup.rollUp()).isEqualTo(3);
 
         assertThat(month(tenantA, "2026-10-01")).containsEntry("delivered_shipments", 2)
-                .containsEntry("total_distance_km", 150.0).containsEntry("saved_co2e_kg", 15.0);
+                .containsEntry("total_distance_km", new BigDecimal("150.000"))
+                .containsEntry("saved_co2e_kg", new BigDecimal("15.000"));
         assertThat(month(tenantA, "2026-11-01")).containsEntry("delivered_shipments", 1);
         assertThat(month(tenantB, "2026-10-01")).containsEntry("delivered_shipments", 1)
-                .containsEntry("total_distance_km", 7.0);
+                .containsEntry("total_distance_km", new BigDecimal("7.000"));
         assertThat(pending(tenantA)).isZero();
+    }
+
+    @Test
+    void theSumsAreExact() {
+        // As doubles, three times 1565.1 came out as 4695.299999999999 on the cluster (S06-02).
+        for (int i = 0; i < 3; i++) {
+            store.store(delivery(tenantA, "2026-11-20T12:46:26Z", 2575, 1565.1));
+        }
+        rollup.rollUp();
+
+        assertThat(month(tenantA, "2026-11-01")).containsEntry("delivered_shipments", 3)
+                .containsEntry("total_distance_km", new BigDecimal("7725.000"))
+                .containsEntry("saved_co2e_kg", new BigDecimal("4695.300"));
     }
 
     @Test
@@ -92,7 +107,7 @@ class MonthlyDeliveryRollupTest extends AnalyticsTestSupport {
         store.store(delivery(tenantA, "2026-09-20T08:00:00Z", 30, 3));
         assertThat(rollup.rollUp()).isEqualTo(1);
         assertThat(month(tenantA, "2026-09-01")).containsEntry("delivered_shipments", 2)
-                .containsEntry("total_distance_km", 40.0);
+                .containsEntry("total_distance_km", new BigDecimal("40.000"));
         assertThat(month(tenantA, "2026-11-01")).containsEntry("delivered_shipments", 1);
     }
 

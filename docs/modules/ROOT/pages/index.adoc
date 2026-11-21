@@ -9,6 +9,7 @@ Code written once, that does not care which implementation is active (xref:ff-lo
 
 | `identity` | The facade over Keycloak, and the only process that calls it: sign-in, service tokens, users, integration clients, and the published keys (JWKS) every application verifies tokens against | S0
 | `domain` | The business areas as jars: standards, warehousing, transportation, routing (xref:ff-logistic::decisions.adoc#d2[decision 2]) | S1
+| `contracts` | `ff-contracts`: one example message per Kafka topic (`contracts/<topic>.json`: fields, key, what may be null, formats) and `EventContract`, the check the modulith's and the services' tests run on what they send. The analytics loader's test reads the same examples | S6
 | `analytics-loader` | Deliveries from Kafka into the analytics database, tenant-locked and rolled up per month | S6
 |===
 
