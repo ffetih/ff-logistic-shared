@@ -25,6 +25,11 @@ spring:
           audiences: ff-logistics-api
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    consumer:
+      # One group for this process's delivery module. A new group reads from the start, so a report
+      # published before the first consumer start is still delivered.
+      group-id: reporting-delivery
+      auto-offset-reset: earliest
     admin:
       operation-timeout: 5s
       close-timeout: 2s
@@ -32,6 +37,17 @@ spring:
       acks: all
       properties:
         max.block.ms: 10000
+  # Mailpit on the cluster (mailpit:1025). From the IDE, an SMTP server on localhost:1025.
+  # No login: Mailpit accepts the message as it arrives.
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
   modulith:
     events:
       externalization:
@@ -53,6 +69,9 @@ ff:
   # This process's outbox. generation publishes ReportReady; the row and the Kafka send share it.
   events:
     schema: reporting
+  kafka:
+    partitions: 3
+    replicas: ${KAFKA_REPLICAS:1}
 
 # The rollup lives in the analytics database. This login is analytics_reader: row-level security
 # applies, and the password is the one V2 of the loader set.
@@ -61,3 +80,10 @@ analytics:
     url: ${ANALYTICS_DB_URL:jdbc:postgresql://localhost:5432/ff_logistics_analytics}
     username: ${ANALYTICS_DB_USERNAME:analytics_reader}
     password: ${ANALYTICS_DB_PASSWORD:analyticsReader2026}
+
+# How a failed send is tried again before it lands on the dead-letter topic. The cluster's values
+# set both, so a test run can use a shorter pause than a later environment without a code change.
+delivery:
+  retry-delay: ${DELIVERY_RETRY_DELAY:PT1S}
+  retry-attempts: ${DELIVERY_RETRY_ATTEMPTS:2}
+  mail-from: ${MAIL_FROM:reports@ff-logistics.local}

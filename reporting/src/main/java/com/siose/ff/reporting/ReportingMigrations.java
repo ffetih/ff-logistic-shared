@@ -12,4 +12,9 @@ class ReportingMigrations {
     MigrationArea generationMigrations() {
         return MigrationArea.of("generation", "generation");
     }
+
+    @Bean
+    MigrationArea deliveryMigrations() {
+        return MigrationArea.of("delivery", "delivery");
+    }
 }
