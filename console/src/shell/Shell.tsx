@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
-import { jaegerServiceUrl, jaegerTraceUrl, readLastTrace, subscribeTrace, type TraceRecord } from "../api/client";
+import { jaegerHomeUrl, jaegerTraceUrl, readLastTrace, subscribeTrace, type TraceRecord } from "../api/client";
 import { useSession } from "../auth/SessionContext";
 
 // The same rules as the edge's @PreAuthorize. TENANT_ADMIN opens every screen.
@@ -86,7 +86,7 @@ export function Shell() {
           ) : (
             <a
               className="badge trace-link"
-              href={jaegerServiceUrl("ff-logistics-app")}
+              href={jaegerHomeUrl()}
               target="_blank"
               rel="noreferrer"
               title="Jaeger dağıtık izleme ekranını aç (:16686)"

@@ -12,10 +12,12 @@ import {
 } from "./api";
 
 const TRACED_SERVICES = [
-  { id: "ff-logistics-app", label: "Lojistik Uygulaması (WMS / TMS / Geo / Rapor)" },
-  { id: "identity-service", label: "Kimlik Servisi (Keycloak Broker)" },
-  { id: "ff-analytics-loader", label: "Analitik Yükleyici (Kafka → PostgreSQL RLS)" },
-  { id: "ff-partner-gateway", label: "Partner Gateway (Northfield / Corvane)" },
+  { id: "logistics-app", label: "Lojistik uygulaması" },
+  { id: "identity-service", label: "Kimlik" },
+  { id: "analytics-loader", label: "Analitik yükleyici" },
+  { id: "warehousing", label: "Depo servisi" },
+  { id: "transportation", label: "Sevkiyat servisi" },
+  { id: "routing", label: "Rota servisi" },
 ];
 
 export function AdminPage() {
