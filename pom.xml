@@ -22,5 +22,6 @@
         <module>contracts</module>
         <module>identity</module>
         <module>analytics-loader</module>
+        <module>reporting</module>
     </modules>
 </project>
