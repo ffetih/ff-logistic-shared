@@ -1,5 +1,6 @@
 package com.siose.ff.identity.superset;
 
+import com.siose.ff.base.tenant.TenantIds;
 import com.siose.ff.identity.config.IdentityProperties;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -48,6 +49,7 @@ public class GuestTokenIssuer {
         if (secret.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Guest token secret is not set");
         }
+        tenantId = TenantIds.require(tenantId);
         String safeUsername = sanitize(username);
         if (safeUsername.isEmpty()) {
             safeUsername = "guest";

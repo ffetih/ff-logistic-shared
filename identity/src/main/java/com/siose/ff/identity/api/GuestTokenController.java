@@ -1,5 +1,6 @@
 package com.siose.ff.identity.api;
 
+import com.siose.ff.base.tenant.TenantIds;
 import com.siose.ff.identity.api.dto.IdentityDtos.GuestTokenRequest;
 import com.siose.ff.identity.api.dto.IdentityDtos.GuestTokenResponse;
 import com.siose.ff.identity.superset.GuestTokenIssuer;
@@ -34,6 +35,12 @@ public class GuestTokenController {
     @PostMapping
     public GuestTokenResponse issue(@AuthenticationPrincipal Jwt caller, @Valid @RequestBody GuestTokenRequest request) {
         String tenantId = caller.getClaimAsString("tenant_id");
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Caller has no tenant");
+        }
+        if (!TenantIds.isValid(tenantId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Access token has an invalid tenant_id claim");
+        }
         if (request.tenantId() != null && !request.tenantId().equals(tenantId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Guest token tenant must be the caller's tenant");
         }
