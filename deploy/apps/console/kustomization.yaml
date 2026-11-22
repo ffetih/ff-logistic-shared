@@ -1,0 +1,9 @@
+# Console (S09-01). Applied by the console Application into ff-logistics.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ff-logistics
+
+resources:
+  - deployment.yaml
+  - service.yaml

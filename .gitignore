@@ -9,6 +9,9 @@ target/
 .classpath
 .factorypath
 
+console/node_modules/
+console/dist/
+
 .DS_Store
 Thumbs.db
 *.tmp

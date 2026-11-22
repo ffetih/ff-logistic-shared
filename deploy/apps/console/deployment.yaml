@@ -1,0 +1,48 @@
+# nginx in the image proxies /identity to identity:8085 and /api to the edge:8081.
+# nginx's resolver ignores search domains, so the names below are full DNS names.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console
+  labels:
+    app.kubernetes.io/name: console
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: console
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: console
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: console
+          image: ff-console:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: IDENTITY_UPSTREAM
+              value: http://identity.ff-logistics.svc.cluster.local:8085
+            - name: APP_UPSTREAM
+              value: http://edge.ff-logistics.svc.cluster.local:8081
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
