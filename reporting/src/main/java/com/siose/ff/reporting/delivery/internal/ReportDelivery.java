@@ -7,6 +7,7 @@ import com.siose.ff.reporting.generation.ReportReady;
 import java.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
@@ -16,6 +17,7 @@ import tools.jackson.databind.json.JsonMapper;
  * report is skipped, so a retry after a later channel failed does not send the earlier one again.
  */
 @Component
+@Profile("!migrate")
 public class ReportDelivery {
 
     private static final Logger log = LoggerFactory.getLogger(ReportDelivery.class);
