@@ -234,8 +234,8 @@ function CreateForm({
         <Field label="Mesafe km"><input name="distanceKm" required type="number" min={0.1} step="0.1" defaultValue={1050} /></Field>
       </div>
       <div className="row">
-        <Field label="Bacak çıkış"><input name="legOrigin" required defaultValue="Cologne Eifeltor Terminal" /></Field>
-        <Field label="Bacak varış"><input name="legDestination" required defaultValue="Trieste" /></Field>
+        <Field label="Bacak çıkış"><input name="legOrigin" required defaultValue="Cologne Eifeltor" /></Field>
+        <Field label="Bacak varış"><input name="legDestination" required defaultValue="Istanbul Hadimkoy" /></Field>
       </div>
       <Field label="Taşıyıcı referansı"><input name="carrierReference" required defaultValue="TXL-41877" /></Field>
       <Button type="submit" disabled={pending}>Planla</Button>
