@@ -126,6 +126,9 @@ class ReportingGenerationTest {
                                OR current_setting('app.all_tenants', true) = 'on')
                     """);
             statement.execute("GRANT SELECT ON tenant_delivery_monthly TO analytics_reader");
+            // The cluster's V2 revokes this. SET LOCAL still works; a query must not call set_config.
+            statement.execute(
+                    "REVOKE EXECUTE ON FUNCTION pg_catalog.set_config(text, text, boolean) FROM PUBLIC");
             statement.execute("DELETE FROM tenant_delivery_monthly");
             statement.execute("""
                     INSERT INTO tenant_delivery_monthly

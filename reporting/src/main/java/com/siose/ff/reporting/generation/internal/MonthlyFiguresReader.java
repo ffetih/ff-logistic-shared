@@ -1,5 +1,6 @@
 package com.siose.ff.reporting.generation.internal;
 
+import com.siose.ff.base.tenant.TenantIds;
 import com.siose.ff.base.web.ResourceNotFoundException;
 import com.siose.ff.reporting.AnalyticsSource;
 import com.zaxxer.hikari.HikariConfig;
@@ -13,8 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * Reads {@code tenant_delivery_monthly} as {@code analytics_reader}. {@code set_config} is
- * local to the transaction, so the row-level policy sees the tenant and the next checkout does not.
+ * Reads {@code tenant_delivery_monthly} as {@code analytics_reader}. {@code SET LOCAL} is its own
+ * statement in this transaction, so the row-level policy sees the tenant and the next checkout
+ * does not. {@code set_config} stays revoked for this role: a chart must not widen its own scope.
  */
 @Component
 class MonthlyFiguresReader implements DisposableBean {
@@ -40,7 +42,7 @@ class MonthlyFiguresReader implements DisposableBean {
 
     MonthFigures read(String tenantId, LocalDate monthStart) {
         List<MonthFigures> rows = transactions.execute(status -> {
-            jdbc.queryForObject("select set_config('app.tenant_id', ?, true)", String.class, tenantId);
+            jdbc.execute("SET LOCAL app.tenant_id = '" + TenantIds.require(tenantId) + "'");
             return jdbc.query("""
                     select delivered_shipments, total_distance_km, saved_co2e_kg
                     from tenant_delivery_monthly
