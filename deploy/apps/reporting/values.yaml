@@ -1,0 +1,34 @@
+# Reporting, every environment. Overrides the chart's defaults
+# (ff-logistic-runtime: deploy/charts/ff-service/values.yaml).
+image:
+  repository: ghcr.io/ffetih/ff-logistic-shared/reporting
+
+containerPort: 8089
+
+service:
+  port: 8089
+
+# One pod. It serves no traffic the edge splits, and it is the same process whichever side is active.
+replicaCount: 1
+
+# Its own database, ff_reporting, on the shared PostgreSQL server. The database Job creates it
+# if missing (PreSync, weight -1), then the migrate Job creates the generation schema and the outbox.
+database:
+  create: true
+  name: ff_reporting
+
+migration:
+  enabled: true
+
+smokeTest:
+  enabled: true
+  checks:
+    - {path: /actuator/health/readiness, status: 200, contains: '"status":"UP"'}
+    - {path: /api/v1/reports, status: 401}
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 256Mi
+  limits:
+    memory: 512Mi
