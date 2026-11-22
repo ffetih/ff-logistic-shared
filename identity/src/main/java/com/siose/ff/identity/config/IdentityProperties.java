@@ -1,5 +1,6 @@
 package com.siose.ff.identity.config;
 
+import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -13,6 +14,8 @@ public class IdentityProperties {
 
     private final Keycloak keycloak = new Keycloak();
 
+    private final Superset superset = new Superset();
+
     public String getBrokerKey() {
         return brokerKey;
     }
@@ -23,6 +26,10 @@ public class IdentityProperties {
 
     public Keycloak getKeycloak() {
         return keycloak;
+    }
+
+    public Superset getSuperset() {
+        return superset;
     }
 
     public static class Keycloak {
@@ -107,6 +114,41 @@ public class IdentityProperties {
 
         public void setAdminPassword(String adminPassword) {
             this.adminPassword = adminPassword;
+        }
+    }
+
+    /**
+     * The guest token Superset accepts. The secret and the audience are the same values
+     * Superset is started with. An empty secret makes the endpoint answer 503.
+     */
+    public static class Superset {
+
+        private String guestTokenSecret = "";
+        private String guestTokenAudience = "ff-logistic";
+        private Duration guestTokenTtl = Duration.ofMinutes(5);
+
+        public String getGuestTokenSecret() {
+            return guestTokenSecret;
+        }
+
+        public void setGuestTokenSecret(String guestTokenSecret) {
+            this.guestTokenSecret = guestTokenSecret;
+        }
+
+        public String getGuestTokenAudience() {
+            return guestTokenAudience;
+        }
+
+        public void setGuestTokenAudience(String guestTokenAudience) {
+            this.guestTokenAudience = guestTokenAudience;
+        }
+
+        public Duration getGuestTokenTtl() {
+            return guestTokenTtl;
+        }
+
+        public void setGuestTokenTtl(Duration guestTokenTtl) {
+            this.guestTokenTtl = guestTokenTtl;
         }
     }
 }

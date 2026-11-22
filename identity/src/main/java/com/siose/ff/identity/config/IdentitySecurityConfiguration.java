@@ -14,7 +14,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * Login, refresh, logout, JWKS and the service-token broker are open on this service.
- * User administration requires a realm token with TENANT_ADMIN. Tokens are checked with the
+ * User administration requires a realm token with TENANT_ADMIN. A planner's access
+ * token exchanges for a Superset guest token. Tokens are checked with the
  * cached Keycloak JWKS, so this process does not call Keycloak to validate them.
  */
 @Configuration
@@ -35,6 +36,7 @@ public class IdentitySecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/sessions", "/sessions/refresh", "/sessions/client", "/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/jwks").permitAll()
                         .requestMatchers(HttpMethod.POST, "/service-tokens").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/guest-tokens").hasRole("LOGISTICS_PLANNER")
                         .requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole("TENANT_ADMIN")
                         .requestMatchers("/api/v1/integration-clients", "/api/v1/integration-clients/**").hasRole("TENANT_ADMIN")
                         .anyRequest().denyAll())
