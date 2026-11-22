@@ -33,6 +33,10 @@ export function subscribeTrace(listener: () => void): () => void {
   };
 }
 
+export function jaegerHomeUrl(): string {
+  return JAEGER_BASE_URL;
+}
+
 export function jaegerTraceUrl(traceId: string): string {
   return `${JAEGER_BASE_URL}/trace/${encodeURIComponent(traceId)}`;
 }
