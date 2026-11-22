@@ -1,4 +1,5 @@
-# nginx in the image proxies /identity to identity:8085 and /api to the edge:8081.
+# nginx in the image proxies /identity to identity:8085, /reporting to reporting:8089
+# and /api to the edge:8081.
 # nginx's resolver ignores search domains, so the names below are full DNS names.
 apiVersion: apps/v1
 kind: Deployment
@@ -28,6 +29,8 @@ spec:
           env:
             - name: IDENTITY_UPSTREAM
               value: http://identity.ff-logistics.svc.cluster.local:8085
+            - name: REPORTING_UPSTREAM
+              value: http://reporting.ff-logistics.svc.cluster.local:8089
             - name: APP_UPSTREAM
               value: http://edge.ff-logistics.svc.cluster.local:8081
           readinessProbe:
