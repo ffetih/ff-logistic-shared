@@ -47,6 +47,14 @@ class GuestTokenIssuerTest {
     }
 
     @Test
+    void refusesATenantIdThatCouldBreakTheClause() {
+        GuestTokenIssuer issuer = new GuestTokenIssuer(SECRET, "ff-logistic", Duration.ofMinutes(5));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> issuer.sign("ff-eu'; SET app.all_tenants = 'on", "nexus.planner", "monthly", Instant.now()));
+    }
+
+    @Test
     void refusesToSignWhenTheSecretIsMissing() {
         GuestTokenIssuer issuer = new GuestTokenIssuer("  ", "ff-logistic", Duration.ofMinutes(5));
 
