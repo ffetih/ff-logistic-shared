@@ -1,0 +1,12 @@
+# The PreSync Job. The chassis turns the web server off. Leave the broker alone: the Job only
+# migrates, and a missing broker must not hold it.
+spring:
+  modulith:
+    events:
+      externalization:
+        enabled: false
+  kafka:
+    admin:
+      auto-create: false
+    listener:
+      auto-startup: false

@@ -39,3 +39,4 @@ jobs:
       images: |
         identity identity
         analytics-loader analytics-loader
+        reporting reporting

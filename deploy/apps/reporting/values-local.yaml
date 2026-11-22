@@ -1,0 +1,52 @@
+# Reporting on the local k3d cluster. Read after values.yaml, so it wins.
+# ClusterIP: the console's nginx calls reporting:8089. No host port.
+
+# Every variable in one list: Helm replaces lists, it does not merge them.
+env:
+  - name: REPORTING_DB_URL
+    value: jdbc:postgresql://postgres:5432/ff_reporting
+  - name: REPORTING_DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: postgres-credentials
+        key: username
+  - name: REPORTING_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: postgres-credentials
+        key: password
+  # The rollup, as analytics_reader. Row-level security applies to this login.
+  - name: ANALYTICS_DB_URL
+    value: jdbc:postgresql://postgres:5432/ff_logistics_analytics
+  - name: ANALYTICS_DB_USERNAME
+    valueFrom:
+      secretKeyRef:
+        name: analytics-reader-credentials
+        key: username
+  - name: ANALYTICS_DB_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: analytics-reader-credentials
+        key: password
+  - name: KAFKA_BOOTSTRAP_SERVERS
+    value: kafka:9092
+  - name: IDENTITY_JWKS_URI
+    value: http://identity:8085/jwks
+  - name: IDENTITY_TOKEN_ISSUER
+    value: http://localhost:8180/realms/ff-logistics
+  - name: STORAGE_PROVIDER
+    value: s3
+  - name: STORAGE_S3_ENDPOINT
+    value: http://rustfs-svc:9000
+  - name: STORAGE_S3_PUBLIC_ENDPOINT
+    value: http://localhost:9000
+  - name: STORAGE_S3_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: rustfs-credentials
+        key: RUSTFS_ACCESS_KEY
+  - name: STORAGE_S3_SECRET_KEY
+    valueFrom:
+      secretKeyRef:
+        name: rustfs-credentials
+        key: RUSTFS_SECRET_KEY
