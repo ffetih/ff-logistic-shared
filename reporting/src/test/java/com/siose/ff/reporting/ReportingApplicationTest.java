@@ -29,6 +29,10 @@ class ReportingApplicationTest {
                 "select max(\"version\") from \"generation\".\"generation_flyway_history\" where \"type\" = 'SQL'",
                 Integer.class);
         assertThat(version).isEqualTo(1);
+        Integer delivery = jdbc.queryForObject(
+                "select max(\"version\") from \"delivery\".\"delivery_flyway_history\" where \"type\" = 'SQL'",
+                Integer.class);
+        assertThat(delivery).isEqualTo(1);
         assertThat(jdbc.queryForObject("select count(*) from reporting.event_publication", Integer.class)).isNotNull();
     }
 

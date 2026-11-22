@@ -50,3 +50,17 @@ env:
       secretKeyRef:
         name: rustfs-credentials
         key: RUSTFS_SECRET_KEY
+  # Mailpit's SMTP. The UI is on host port 8092; mail stays inside the cluster.
+  - name: MAIL_HOST
+    value: mailpit
+  - name: MAIL_PORT
+    value: "1025"
+  - name: MAIL_FROM
+    value: reports@ff-logistics.local
+  # A failed send waits this long, then tries again this many times, then the record goes to
+  # ff.logistics.reporting.report-ready.reporting-delivery.dlt. One second so a dead webhook
+  # shows on that topic within a few seconds. A later environment can raise the pause.
+  - name: DELIVERY_RETRY_DELAY
+    value: PT1S
+  - name: DELIVERY_RETRY_ATTEMPTS
+    value: "2"
