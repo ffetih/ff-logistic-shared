@@ -1,5 +1,6 @@
 # Every topic the product sends to, one per line: a file <topic>.json next to this one holds its
-# contract. Both implementations send to all of them.
+# contract. A producer verifies what it sends against that file.
 ff.logistics.tms.shipment-delivered
 ff.logistics.tms.shipment-progressed
 ff.logistics.geo.route-stop-completed
+ff.logistics.reporting.report-ready

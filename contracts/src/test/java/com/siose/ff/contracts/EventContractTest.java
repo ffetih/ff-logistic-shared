@@ -27,9 +27,10 @@ class EventContractTest {
     }
 
     @Test
-    void listsTheThreeTopics() {
+    void listsEveryTopic() {
         assertThat(EventContract.topics()).containsExactly("ff.logistics.tms.shipment-delivered",
-                "ff.logistics.tms.shipment-progressed", "ff.logistics.geo.route-stop-completed");
+                "ff.logistics.tms.shipment-progressed", "ff.logistics.geo.route-stop-completed",
+                "ff.logistics.reporting.report-ready");
     }
 
     @Test

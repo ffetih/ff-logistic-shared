@@ -1,0 +1,17 @@
+{
+  "topic": "ff.logistics.reporting.report-ready",
+  "event": "ReportReady, of report generation",
+  "key": "reportId",
+  "nullable": [],
+  "formats": {"reportId": "uuid", "generatedAt": "instant"},
+  "example": {
+    "reportId": "a1b2c3d4-e5f6-4789-a012-3456789abcde",
+    "tenantId": "ff-eu-freight",
+    "month": "2026-11",
+    "objectKey": "ff-eu-freight/report/2026-11/monthly.pdf",
+    "deliveredShipments": 40,
+    "totalDistanceKm": 1200.5,
+    "savedCo2eKg": 80.25,
+    "generatedAt": "2026-11-22T17:06:00Z"
+  }
+}

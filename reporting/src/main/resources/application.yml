@@ -1,0 +1,63 @@
+# The chassis (ff-base-app) brings the shared defaults: probes, virtual threads, the trace export.
+# Only what is particular to this process is here.
+server:
+  port: 8089
+
+spring:
+  application:
+    name: reporting
+  # ff_reporting on the cluster's PostgreSQL. The chart's database Job creates it; from the IDE the
+  # same server is on localhost:5432. No JPA entities: Flyway (AreaMigrations) owns the tables.
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: ${REPORTING_DB_URL:jdbc:postgresql://localhost:5432/ff_reporting}
+    username: ${REPORTING_DB_USERNAME:fflogistics}
+    password: ${REPORTING_DB_PASSWORD:fflogisticsDb2026}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # The same keys and issuer as the edge: a console token is checked here, never at Keycloak.
+          jwk-set-uri: ${IDENTITY_JWKS_URI:http://localhost:8085/jwks}
+          issuer-uri: ${IDENTITY_TOKEN_ISSUER:http://localhost:8180/realms/ff-logistics}
+          audiences: ff-logistics-api
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    admin:
+      operation-timeout: 5s
+      close-timeout: 2s
+    producer:
+      acks: all
+      properties:
+        max.block.ms: 10000
+  modulith:
+    events:
+      externalization:
+        enabled: ${EVENTS_EXTERNALIZATION_ENABLED:true}
+
+ff:
+  storage:
+    provider: ${STORAGE_PROVIDER:reference-only}
+    bucket: ff-documents
+    s3:
+      endpoint: ${STORAGE_S3_ENDPOINT:http://localhost:9000}
+      public-endpoint: ${STORAGE_S3_PUBLIC_ENDPOINT:}
+      access-key: ${STORAGE_S3_ACCESS_KEY:}
+      secret-key: ${STORAGE_S3_SECRET_KEY:}
+      timeout: PT5S
+  security:
+    header-fallback:
+      enabled: false
+  # This process's outbox. generation publishes ReportReady; the row and the Kafka send share it.
+  events:
+    schema: reporting
+
+# The rollup lives in the analytics database. This login is analytics_reader: row-level security
+# applies, and the password is the one V2 of the loader set.
+analytics:
+  datasource:
+    url: ${ANALYTICS_DB_URL:jdbc:postgresql://localhost:5432/ff_logistics_analytics}
+    username: ${ANALYTICS_DB_USERNAME:analytics_reader}
+    password: ${ANALYTICS_DB_PASSWORD:analyticsReader2026}
