@@ -15,6 +15,7 @@ const TRACED_SERVICES = [
   { id: "logistics-app", label: "Lojistik uygulaması" },
   { id: "identity-service", label: "Kimlik" },
   { id: "analytics-loader", label: "Analitik yükleyici" },
+  { id: "reporting", label: "Raporlama" },
   { id: "warehousing", label: "Depo servisi" },
   { id: "transportation", label: "Sevkiyat servisi" },
   { id: "routing", label: "Rota servisi" },

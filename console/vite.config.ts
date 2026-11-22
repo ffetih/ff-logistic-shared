@@ -10,6 +10,10 @@ export default defineConfig({
         target: "http://localhost:8085",
         rewrite: (path) => path.replace(/^\/identity/, ""),
       },
+      "/reporting": {
+        target: "http://localhost:8089",
+        rewrite: (path) => path.replace(/^\/reporting/, ""),
+      },
       "/api": {
         target: "http://localhost:8081",
       },

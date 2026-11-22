@@ -4,14 +4,14 @@ import { jaegerHomeUrl, jaegerTraceUrl, readLastTrace, subscribeTrace, type Trac
 import { useSession } from "../auth/SessionContext";
 
 // The same rules as the edge's @PreAuthorize. TENANT_ADMIN opens every screen.
-// The report screen follows the guest-token caller: LOGISTICS_PLANNER.
+// The report screen is the reporting API's callers: planner and report viewer.
 type Screen = { to: string; label: string; roles: string[]; exact?: boolean };
 
 const LINKS: Screen[] = [
   { to: "/warehouse", label: "Depo", roles: ["WAREHOUSE_OPERATOR"] },
   { to: "/shipments", label: "Sevkiyat", roles: ["LOGISTICS_PLANNER"] },
   { to: "/routes", label: "Rota", roles: ["DISPATCHER"] },
-  { to: "/reports", label: "Rapor", roles: ["LOGISTICS_PLANNER"] },
+  { to: "/reports", label: "Rapor", roles: ["LOGISTICS_PLANNER", "REPORT_VIEWER"] },
   { to: "/admin", label: "Yönetim", roles: ["TENANT_ADMIN"] },
 ];
 

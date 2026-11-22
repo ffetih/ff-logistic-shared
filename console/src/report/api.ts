@@ -24,6 +24,41 @@ type GuestTokenResponse = {
   expiresAt: string;
 };
 
+export type MonthlyReport = {
+  id: string;
+  month: string;
+  deliveredShipments: number;
+  totalDistanceKm: number;
+  savedCo2eKg: number;
+  generatedAt: string;
+  downloadUrl: string;
+};
+
+export type ReportChannels = {
+  emailEnabled: boolean;
+  emailAddress: string | null;
+  webhookEnabled: boolean;
+  webhookUrl: string | null;
+};
+
+const REPORTS = "/reporting/api/v1/reports";
+
+export function listReports(): Promise<MonthlyReport[]> {
+  return api(REPORTS);
+}
+
+export function generateMonthlyReport(month: string): Promise<MonthlyReport> {
+  return api(`${REPORTS}/monthly`, { method: "POST", body: { month } });
+}
+
+export function readChannels(): Promise<ReportChannels> {
+  return api(`${REPORTS}/channels`);
+}
+
+export function saveChannels(channels: ReportChannels): Promise<ReportChannels> {
+  return api(`${REPORTS}/channels`, { method: "PUT", body: channels });
+}
+
 export function issueSupersetGuestToken(): Promise<SupersetGuestToken> {
   return api<GuestTokenResponse>("/identity/api/v1/guest-tokens", {
     method: "POST",
