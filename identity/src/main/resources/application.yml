@@ -31,6 +31,12 @@ identity:
     service-client-secret: ${IDENTITY_KEYCLOAK_SERVICE_CLIENT_SECRET:ff-logistics-service-secret}
     admin-username: ${IDENTITY_KEYCLOAK_ADMIN_USERNAME:admin}
     admin-password: ${IDENTITY_KEYCLOAK_ADMIN_PASSWORD:admin}
+  # Same secret and audience as Superset (runtime deploy/platform/superset).
+  # Empty secret: POST /api/v1/guest-tokens answers 503.
+  superset:
+    guest-token-secret: ${SUPERSET_GUEST_TOKEN_JWT_SECRET:ff-superset-guest-dev-2026-local}
+    guest-token-audience: ${SUPERSET_GUEST_TOKEN_JWT_AUDIENCE:ff-logistic}
+    guest-token-ttl: ${SUPERSET_GUEST_TOKEN_TTL:PT5M}
 
 management:
   endpoints:

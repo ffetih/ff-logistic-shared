@@ -31,3 +31,11 @@ env:
       secretKeyRef:
         name: keycloak-credentials
         key: identity-broker-key
+  # The same secret Superset verifies. The value lives in one place.
+  - name: SUPERSET_GUEST_TOKEN_JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: superset-credentials
+        key: guest-token-secret
+  - name: SUPERSET_GUEST_TOKEN_JWT_AUDIENCE
+    value: ff-logistic

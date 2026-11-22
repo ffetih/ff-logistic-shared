@@ -6,8 +6,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Base64;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -30,6 +33,12 @@ class IdentityApiTest {
     private static RequestPostProcessor adminOf(String tenantId) {
         return jwt().jwt(token -> token.claim("tenant_id", tenantId))
                 .authorities(new SimpleGrantedAuthority("ROLE_TENANT_ADMIN"));
+    }
+
+    /** A planner of the given tenant. The guest token takes its tenant from this token. */
+    private static RequestPostProcessor plannerOf(String tenantId) {
+        return jwt().jwt(token -> token.claim("tenant_id", tenantId).claim("preferred_username", "nexus.planner"))
+                .authorities(new SimpleGrantedAuthority("ROLE_LOGISTICS_PLANNER"));
     }
 
     @Autowired
@@ -283,5 +292,51 @@ class IdentityApiTest {
                                 {"name":"taken"}
                                 """))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldExchangeAPlannersTokenForAGuestTokenOfThatTenant() throws Exception {
+        mockMvc.perform(post("/api/v1/guest-tokens")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dashboardId":"monthly"}
+                                """))
+                .andExpect(status().isUnauthorized());
+
+        mockMvc.perform(post("/api/v1/guest-tokens")
+                        .with(jwt().jwt(token -> token.claim("tenant_id", "ff-eu-freight")
+                                        .claim("preferred_username", "nexus.operator"))
+                                .authorities(new SimpleGrantedAuthority("ROLE_WAREHOUSE_OPERATOR")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dashboardId":"monthly"}
+                                """))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post("/api/v1/guest-tokens")
+                        .with(plannerOf("ff-eu-freight"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dashboardId":"monthly","tenantId":"ff-tr-distribution"}
+                                """))
+                .andExpect(status().isForbidden());
+
+        String body = mockMvc.perform(post("/api/v1/guest-tokens")
+                        .with(plannerOf("ff-eu-freight"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"dashboardId":"monthly"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.tenantId").value("ff-eu-freight"))
+                .andExpect(jsonPath("$.dashboardId").value("monthly"))
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andReturn().getResponse().getContentAsString();
+
+        JsonNode token = JsonMapper.builder().build().readTree(body).get("token");
+        JsonNode claims = JsonMapper.builder().build().readTree(
+                Base64.getUrlDecoder().decode(token.asString().split("\\.")[1]));
+        org.junit.jupiter.api.Assertions.assertEquals("ff-eu-freight", claims.get("app").get("tenant_id").asString());
+        org.junit.jupiter.api.Assertions.assertEquals("monthly", claims.get("resources").get(0).get("id").asString());
     }
 }

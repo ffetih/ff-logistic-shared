@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.util.List;
 
 public final class IdentityDtos {
@@ -51,5 +52,20 @@ public final class IdentityDtos {
     }
 
     public record UserResponse(String id, String username, String tenantId, List<String> roles) {
+    }
+
+    /**
+     * One dashboard. {@code tenantId}, when present, has to be the caller's own tenant:
+     * the signed token never takes a tenant from this body.
+     */
+    public record GuestTokenRequest(
+            @NotBlank @jakarta.validation.constraints.Pattern(regexp = "[A-Za-z0-9][A-Za-z0-9._-]{0,63}",
+                    message = "a dashboard id is 1 to 64 letters, digits, dot, underscore or hyphen") String dashboardId,
+            @jakarta.validation.constraints.Pattern(regexp = "[a-z0-9][a-z0-9-]{1,63}",
+                    message = "a tenant id has 2 to 64 lower-case letters, digits or hyphens") String tenantId
+    ) {
+    }
+
+    public record GuestTokenResponse(String token, String tenantId, String dashboardId, Instant expiresAt) {
     }
 }
