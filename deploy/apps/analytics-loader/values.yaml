@@ -22,11 +22,13 @@ database:
 migration:
   enabled: true
 
-# No API and no sign-in: ready means its database and its consumer are up.
+# Ready means its database and its consumer are up. The recount POST is authenticated and
+# checks no role; this only checks that a caller without a token is refused.
 smokeTest:
   enabled: true
   checks:
     - {path: /actuator/health/readiness, status: 200, contains: '"status":"UP"'}
+    - {path: /api/v1/rollups, status: 401}
 
 resources:
   requests:

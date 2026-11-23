@@ -33,6 +33,15 @@
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-tenant</artifactId>
         </dependency>
+        <!-- The recount POST: any authenticated caller, no role. The same chain as the other services. -->
+        <dependency>
+            <groupId>com.siose.ff</groupId>
+            <artifactId>ff-base-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-kafka</artifactId>
@@ -59,7 +68,7 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- The probes, and the port the chart's Service points at; the loader serves no API -->
+        <!-- The probes, the port the chart's Service points at, and the recount POST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
@@ -82,6 +91,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- The example message both implementations' tests check what they send against -->

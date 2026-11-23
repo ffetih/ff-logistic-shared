@@ -45,6 +45,14 @@ spring:
       # The dead-letter topic is created at the start; without a broker, the start is held 5 s.
       operation-timeout: 5s
       close-timeout: 2s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # The same keys and issuer as reporting: a planner token is checked here, never at Keycloak.
+          jwk-set-uri: ${IDENTITY_JWKS_URI:http://localhost:8085/jwks}
+          issuer-uri: ${IDENTITY_TOKEN_ISSUER:http://localhost:8180/realms/ff-logistics}
+          audiences: ff-logistics-api
 
 management:
   # This process does not use the chassis, so the export address is repeated here.
