@@ -33,7 +33,7 @@
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-tenant</artifactId>
         </dependency>
-        <!-- The recount POST: any authenticated caller, no role. The same chain as the other services. -->
+        <!-- The recount POST: LOGISTICS_PLANNER or TENANT_ADMIN. The same chain as the other services. -->
         <dependency>
             <groupId>com.siose.ff</groupId>
             <artifactId>ff-base-security</artifactId>
