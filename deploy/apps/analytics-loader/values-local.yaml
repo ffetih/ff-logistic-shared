@@ -28,3 +28,8 @@ env:
       secretKeyRef:
         name: analytics-reader-credentials
         key: password
+  # The recount POST checks the planner's token the same way reporting does.
+  - name: IDENTITY_JWKS_URI
+    value: http://identity:8085/jwks
+  - name: IDENTITY_TOKEN_ISSUER
+    value: http://localhost:8180/realms/ff-logistics
