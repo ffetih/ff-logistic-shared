@@ -22,8 +22,8 @@ database:
 migration:
   enabled: true
 
-# Ready means its database and its consumer are up. The recount POST is authenticated and
-# checks no role; this only checks that a caller without a token is refused.
+# Ready means its database and its consumer are up. The recount POST requires LOGISTICS_PLANNER
+# or TENANT_ADMIN; this smoke check verifies an unauthenticated caller is refused.
 smokeTest:
   enabled: true
   checks:
